@@ -148,7 +148,7 @@ export const generateSeo = async (req, res) => {
 
             Please respond strictly in the following format:
             Title: <catchy SEO title which should be seo friendly 60 character max>
-            Description: <atleast 4 paragraphs of engaging blog description seo friendly>
+            Description: <write in rich text format with headings like h1, h2 , h3 and paragraphs, bold, italic and bullets, underlined etc all things can be done etc of engaging blog description seo friendly min 7 paragraph max 10>
             Keywords: <5 comma-separated SEO keyword list>
         `;
 

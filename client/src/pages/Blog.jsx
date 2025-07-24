@@ -7,6 +7,7 @@ import Footer from '../components/Footer'
 import Loader from '../components/Loader'
 import { useAppContext } from '../context/AppContext'
 import toast from 'react-hot-toast'
+import { ClipboardCopy, FileText, FileDown } from 'lucide-react' 
 
 
 const Blog = () => {
@@ -16,7 +17,6 @@ const Blog = () => {
 
   const [data, setData] = useState(null)
   const [comments, setComments] = useState([]);
-
 
   const [name, setName] = useState('')
   const [content, setContent] = useState('')
@@ -49,7 +49,6 @@ const Blog = () => {
     try {
       const { data } = await axios.post('/api/blog/add-comment', { blog: id, name, content })
       if (data.success) {
-
         toast.success(data.message)
         setName('')
         setContent('')
@@ -69,14 +68,12 @@ const Blog = () => {
 
   return data ? (
     <div className='relative'>
-
       <img src={assets.gradientBackground} alt="" className='absolute -top-20 z-[-1] opacity-50' />
       <Navbar />
 
       <div className='text-center mt-20 text-gray-600'>
         <p className='text-primary py-4 font-medium'>Published on {Moment(data.createdAt).format('MMMM Do YYYY')}</p>
         <h1 className='text-2xl sm:text-5xl font-semibold max-w-2xl mx-auto text-gray-800'>{data.title}</h1>
-        {/* <h2 className='my-5 max-w-lg truncate mx-auto'>{data.keyword}</h2> */}
         <p className='my-5 inline-block py-1 px-4 rounded-full mb-6 border text-sm border-primary/35 bg-primary/5 font-medium text-primary'>Anuj Mishra</p>
       </div>
 
@@ -97,8 +94,6 @@ const Blog = () => {
           </div>
         )}
 
-
-
         {/* comments section */}
         <div className='mt-14 mb-10 max-w-3xl mx-auto'>
           <p className='font-semibold mb-4'>Comments ({Array.isArray(comments) ? comments.length : 0})</p>
@@ -115,6 +110,7 @@ const Blog = () => {
             ))}
           </div>
         </div>
+
         {/* Add comment section */}
         <div className='max-w-3xl mx-auto'>
           <p className='font-semibold mb-4'>Add your comment</p>
@@ -125,19 +121,19 @@ const Blog = () => {
             <button type='submit' className='bg-primary text-white rounded p-2 px-8 hover:scale-102 transition-all cursor-pointer'>Submit</button>
           </form>
         </div>
-        {/* Share buttons */}
 
+        {/* Share buttons */}
         <div className='my-20 max-w-3xl mx-auto'>
           <p className='font-semibold my-4'>Share this article on social media</p>
-          <div className='flex'>
+          <div className='flex cursor-pointer'>
             <img src={assets.facebook_icon} width={50} alt="" />
             <img src={assets.twitter_icon} width={50} alt="" />
             <img src={assets.googleplus_icon} width={50} alt="" />
           </div>
         </div>
-        {/* Export options */}
+
         <div className='my-20 max-w-3xl mx-auto'>
-          <p className='font-semibold my-4'>Export Options</p>
+          <p className='font-semibold mb-4 text-lg text-gray-800'>Export Options</p>
           <div className='flex flex-wrap gap-4'>
 
             {/* Copy to Clipboard */}
@@ -147,9 +143,10 @@ const Blog = () => {
                 navigator.clipboard.writeText(text);
                 toast.success("Copied to clipboard!");
               }}
-              className='bg-primary/10 text-primary px-4 py-2 rounded cursor-pointer'
+              className='flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl hover:scale-105 transition-all shadow-sm border border-primary/20 cursor-pointer'
             >
-              📋 Copy to Clipboard
+              <ClipboardCopy size={18} />
+              Copy to Clipboard
             </button>
 
             {/* Download as .md */}
@@ -161,9 +158,10 @@ const Blog = () => {
                 link.download = `${data.title.replace(/\s+/g, "_")}.md`;
                 link.click();
               }}
-              className='bg-primary/10 text-primary px-4 py-2 rounded cursor-pointer'
+              className='flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl hover:scale-105 transition-all shadow-sm border border-primary/20 cursor-pointer'
             >
-              ⬇️ Download as .md
+              <FileDown size={18} />
+              Download as .md
             </button>
 
             {/* Download as .txt */}
@@ -175,9 +173,10 @@ const Blog = () => {
                 link.download = `${data.title.replace(/\s+/g, "_")}.txt`;
                 link.click();
               }}
-              className='bg-primary/10 text-primary px-4 py-2 rounded cursor-pointer'
+              className='flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-xl hover:scale-105 transition-all shadow-sm border border-primary/20 cursor-pointer'
             >
-              ⬇️ Download as .txt
+              <FileText size={18} />
+              Download as .txt
             </button>
 
           </div>
@@ -185,7 +184,6 @@ const Blog = () => {
 
       </div>
       <Footer />
-
     </div>
   ) : <Loader />
 }
