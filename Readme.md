@@ -35,4 +35,4 @@ QuickBlog is a full-featured **AI-powered blogging platform** built with the **M
 
 ## 🔗 Live Project Link
 
-[🌐 QuickBlog - Live Site](https://quick-blog-drab-phi.vercel.app/)  
+[🌐 QuickBlog - Live Site](https://quick-blog-anuj-mishra.vercel.app/)  
