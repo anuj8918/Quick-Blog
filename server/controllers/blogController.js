@@ -5,6 +5,7 @@ import Comment from '../models/comment.js'
 import main from '../configs/gemini.js'
 import axios from 'axios';
 import imagekit from '../configs/imageKit.js';
+import FormData from "form-data";
 
 export const addBlog = async (req, res) => {
     try {
@@ -243,49 +244,48 @@ export const editBlog = async (req, res) => {
 };
 
 export const generateImage = async (req, res) => {
+  const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
 
-    const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
+  if (!STABILITY_API_KEY) {
+    return res.status(500).json({ success: false, message: "API key missing in .env" });
+  }
 
-    if (!STABILITY_API_KEY) {
-        console.error("Stability API key not found in .env file.");
-        return res.status(500).json({ success: false, message: "Server configuration error: API key missing." });
+  const { prompt } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({ success: false, message: "Prompt is required." });
+  }
+
+  try {
+    const payload = {
+      prompt: `Professional blog thumbnail, cinematic style, for: "${prompt}"`,
+      output_format: "jpeg",
+    };
+
+    const response = await axios.postForm(
+      "https://api.stability.ai/v2beta/stable-image/generate/sd3",
+      axios.toFormData(payload, new FormData()),
+      {
+        validateStatus: undefined,
+        responseType: "arraybuffer",
+        headers: {
+          Authorization: `Bearer ${STABILITY_API_KEY}`,
+          Accept: "image/*",
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      // Convert image buffer to base64 to send back to frontend
+      const base64Image = Buffer.from(response.data).toString("base64");
+      const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+      res.json({ success: true, imageUrl });
+    } else {
+      throw new Error(`${response.status}: ${response.data.toString()}`);
     }
 
-    try {
-        const { prompt } = req.body;
-        if (!prompt) {
-            return res.status(400).json({ success: false, message: "Prompt is required." });
-        }
-
-        const response = await axios.post(
-            'https://api.stability.ai/v1/generation/stable-diffusion-v1-6/text-to-image',
-            {
-                text_prompts: [{ text: `Professional blog thumbnail, cinematic style, for an article titled: "${prompt}"` }],
-                cfg_scale: 7,
-                height: 576,
-                width: 1024,
-                steps: 30,
-                samples: 1,
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${STABILITY_API_KEY}`,
-                },
-            }
-        );
-
-
-        const base64Image = response.data.artifacts[0].base64;
-        const imageUrl = `data:image/png;base64,${base64Image}`;
-
-
-        res.json({ success: true, imageUrl: imageUrl });
-
-    } catch (error) {
-        console.error("STABILITY AI ERROR:", error.response ? error.response.data : error.message);
-        res.status(500).json({ success: false, message: "Failed to generate image via Stability AI." });
-    }
+  } catch (err) {
+    console.error("STABILITY AI ERROR:", err.message);
+    res.status(500).json({ success: false, message: "Image generation failed." });
+  }
 };
-
