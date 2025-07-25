@@ -6,6 +6,7 @@ import main from '../configs/gemini.js'
 import axios from 'axios';
 import imagekit from '../configs/imageKit.js';
 import FormData from "form-data";
+import path from "path";
 
 export const addBlog = async (req, res) => {
     try {
@@ -243,10 +244,12 @@ export const editBlog = async (req, res) => {
     }
 };
 
-export const generateImage = async (req, res) => {
-  const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
 
-  if (!STABILITY_API_KEY) {
+
+export const generateImage = async (req, res) => {
+  const CLIPDROP_API_KEY = process.env.CLIPDROP_API_KEY;
+
+  if (!CLIPDROP_API_KEY) {
     return res.status(500).json({ success: false, message: "API key missing in .env" });
   }
 
@@ -257,35 +260,33 @@ export const generateImage = async (req, res) => {
   }
 
   try {
-    const payload = {
-      prompt: `Professional blog thumbnail, cinematic style, for: "${prompt}"`,
-      output_format: "jpeg",
-    };
+    // Clipdrop text-to-image endpoint
+    const apiUrl = "https://clipdrop-api.co/text-to-image/v1";
 
-    const response = await axios.postForm(
-      "https://api.stability.ai/v2beta/stable-image/generate/sd3",
-      axios.toFormData(payload, new FormData()),
-      {
-        validateStatus: undefined,
-        responseType: "arraybuffer",
-        headers: {
-          Authorization: `Bearer ${STABILITY_API_KEY}`,
-          Accept: "image/*",
-        },
-      }
-    );
+    // Create form-data payload
+    const formData = new FormData();
+    formData.append("prompt", `Professional blog thumbnail, real looking style, for: "${prompt}"`);
+
+    // Make API request
+    const response = await axios.post(apiUrl, formData, {
+      headers: {
+        "x-api-key": CLIPDROP_API_KEY,
+        ...formData.getHeaders(),
+      },
+      responseType: "arraybuffer",
+    });
 
     if (response.status === 200) {
-      // Convert image buffer to base64 to send back to frontend
+      // Convert buffer to base64 like earlier
       const base64Image = Buffer.from(response.data).toString("base64");
-      const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+      const imageUrl = `data:image/png;base64,${base64Image}`;
       res.json({ success: true, imageUrl });
     } else {
       throw new Error(`${response.status}: ${response.data.toString()}`);
     }
 
   } catch (err) {
-    console.error("STABILITY AI ERROR:", err.message);
+    console.error("CLIPDROP ERROR:", err.message);
     res.status(500).json({ success: false, message: "Image generation failed." });
   }
 };
